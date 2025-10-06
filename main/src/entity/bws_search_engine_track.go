@@ -10,12 +10,7 @@ type BwsSearchEngineTrack struct {
 	/**
 	 * Search engine used
 	 */
-	BwsSearchEngine enum.BwSearchEngineEnum `bson:"searchEngine" json:"searchEngine"`
-
-	/**
-	 * Current position of site in google
-	 */
-	CurrentPosition int `bson:"currentPosition" json:"currentPosition"`
+	SearchEngine enum.BwSearchEngineEnum `bson:"searchEngine" json:"searchEngine"`
 
 	/**
 	 * Current last of site in google
@@ -66,4 +61,48 @@ type BwsSearchEngineTrack struct {
 	 * Date that was updated
 	 */
 	UpdateAtDate time.Time `bson:"updateAtDate" json:"updateAtDate"`
+
+	/**
+	 * Store keyword data about url
+	 */
+	KeywordsPerformance BwsKeywordsPerformance `bson:"keywordsPerformance" json:"keywordsPerformance"`
+}
+
+/**
+ * Update data rul track
+ */
+func (t *BwsSearchEngineTrack) UpdateData(searchEngineTrack BwsSearchEngineTrack) *BwsSearchEngineTrack {
+	t.SearchEngine = searchEngineTrack.SearchEngine
+	t.Crawler = searchEngineTrack.Crawler
+	t.IndexState = searchEngineTrack.IndexState
+	t.Verdict = searchEngineTrack.Verdict
+	t.VerdictDetail = searchEngineTrack.VerdictDetail
+	t.PageState = searchEngineTrack.PageState
+	t.Canonical = searchEngineTrack.Canonical
+	t.ReferringUrls = searchEngineTrack.ReferringUrls
+	t.LastCrawlDate = searchEngineTrack.LastCrawlDate
+	t.UpdateAtDate = time.Now()
+	return t
+}
+
+/**
+ * Update data keywordsPerformance
+ */
+func (t *BwsSearchEngineTrack) updateKeywordPerformance(keywordsPerformance BwsKeywordsPerformance) *BwsSearchEngineTrack {
+	t.KeywordsPerformance = keywordsPerformance
+	return t
+}
+
+/**
+ * Check if is owner or profile
+ */
+func (t *BwsSearchEngineTrack) IsTracked() bool {
+	return t.Verdict == enum.BwsVerdictPass
+}
+
+/**
+ * Check if is owner or profile
+ */
+func (t *BwsSearchEngineTrack) IsUntracked() bool {
+	return t.Verdict != enum.BwsVerdictPass
 }

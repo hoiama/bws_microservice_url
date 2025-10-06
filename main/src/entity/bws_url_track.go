@@ -4,11 +4,33 @@ import (
 	"bws_microservice_url/main/src/enum"
 	"time"
 
+	"github.com/bindways/bw_microservice_share/bw_error"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type BwsUrlTracks []BwsUrlTrack
+
+// Check order of elements
+func (t BwsUrlTracks) Less(i, j int) bool {
+	return t[i].CreateAtDate.After(t[j].CreateAtDate)
+}
+
+// size of elements, interface sort.Interface to invites
+func (t BwsUrlTracks) Len() int {
+	return len(t)
+}
+
+// change elements of position, interface sort.Interface to alter position of invites
+func (t BwsUrlTracks) Swap(i, j int) {
+	t[i], t[j] = t[j], t[i]
+}
+
 type BwsUrlTrack struct {
+
+	/**
+	 * idCustomer
+	 */
+	Id primitive.ObjectID `bson:"_id" json:"id"`
 
 	/**
 	 * idCustomer
@@ -26,11 +48,6 @@ type BwsUrlTrack struct {
 	Keyword string `bson:"keyword" json:"keyword"`
 
 	/**
-	 * Volume search by month
-	 */
-	SearchVolume int `bson:"searchVolume" json:"searchVolume"`
-
-	/**
 	 * status of project
 	 */
 	Status enum.BwsUrlTrackStatusEnum `bson:"status" json:"status"`
@@ -43,44 +60,42 @@ type BwsUrlTrack struct {
 	/**
 	 * search engine data track
 	 */
-	BwsSearchEngineTrack BwsSearchEngineTrack `bson:"searchEngineTrack" json:"searchEngineTrack"`
+	SearchEngineTrack BwsSearchEngineTrack `bson:"searchEngineTrack" json:"searchEngineTrack"`
 }
 
 func NewBwsUrlTrack(idCustomer primitive.ObjectID, url string, engineTrack BwsSearchEngineTrack) BwsUrlTrack {
 	return BwsUrlTrack{
-		IdCustomer:           idCustomer,
-		Url:                  url,
-		Status:               enum.BwsUrlTrackStatusActive,
-		CreateAtDate:         time.Now(),
-		BwsSearchEngineTrack: engineTrack,
+		Id:                primitive.NewObjectID(),
+		IdCustomer:        idCustomer,
+		Url:               url,
+		Status:            enum.BwsUrlTrackStatusActive,
+		CreateAtDate:      time.Now(),
+		SearchEngineTrack: engineTrack,
 	}
 }
 
 /**
- * Set date at current object
+ * Update data rul track
  */
-func (t *BwsUrlTrack) UpdateDate() *BwsUrlTrack {
-	t.CreateAtDate = time.Now()
+func (t *BwsUrlTrack) UpdateData(searchEngineTrack BwsSearchEngineTrack) *BwsUrlTrack {
+	t.SearchEngineTrack.UpdateData(searchEngineTrack)
 	return t
 }
 
 /**
- * Build date at current object
+ * Update data keywordsPerformance
  */
-func (t *BwsUrlTrack) Build() BwsUrlTrack {
-	return *t
+func (t *BwsUrlTrack) UpdateKeywordPerformance(keywordsPerformance BwsKeywordsPerformance) *BwsUrlTrack {
+	t.SearchEngineTrack.updateKeywordPerformance(keywordsPerformance)
+	return t
 }
 
 /**
- * Check is url same
+ * Check if is owner or profile
  */
-func (t *BwsUrlTrack) IsUrl(url string) bool {
-	return t.Url == url
-}
-
-/**
- * update track date today
- */
-func (t *BwsUrlTracks) IsEmpty() (has bool) {
-	return len(*t) == 0
+func (t *BwsUrlTrack) ValidIsOwner(idCustomer primitive.ObjectID) error {
+	if t.IdCustomer != idCustomer {
+		return bw_error.BwErrorNotOwnerResource.Pt()
+	}
+	return nil
 }

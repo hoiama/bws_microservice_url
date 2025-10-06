@@ -2,6 +2,7 @@ package urls
 
 import (
 	"bws_microservice_url/main/src/entity"
+	"sort"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -32,6 +33,25 @@ func (t *BwsUrlTrackService) GetUrlTrack(url string) (exist bool, urlTrack entit
 /**
  * Get all url tracks
  */
-func (t *BwsUrlTrackService) GetUrlTrackByCustomer(idCustomer primitive.ObjectID) (urlTrack []entity.BwsUrlTrack, err error) {
-	return t.projectDep.getUrlTracks(idCustomer)
+func (t *BwsUrlTrackService) GetUrlTrackByCustomer(idCustomer primitive.ObjectID) (urlTrack entity.BwsUrlTracks, err error) {
+	urlTrack, err = t.projectDep.getUrlTracks(idCustomer)
+	if err != nil {
+		return
+	}
+	sort.Sort(urlTrack)
+	return
+}
+
+/**
+ * Get url track by id
+ */
+func (t *BwsUrlTrackService) GetUrlByI(idUrl primitive.ObjectID) (urlTrack entity.BwsUrlTrack, err error) {
+	return t.projectDep.getUrlById(idUrl)
+}
+
+/**
+ * Update track data
+ */
+func (t *BwsUrlTrackService) UpdateUrl(track entity.BwsUrlTrack) error {
+	return t.projectDep.updateTrack(track)
 }

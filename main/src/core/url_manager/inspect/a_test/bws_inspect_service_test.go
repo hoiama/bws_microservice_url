@@ -1,7 +1,7 @@
 package a_test
 
 import (
-	"bws_microservice_url/main/src/core/inspect"
+	"bws_microservice_url/main/src/core/url_manager/inspect"
 	"bws_microservice_url/main/src/dto"
 	"fmt"
 	"testing"

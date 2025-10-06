@@ -5,10 +5,11 @@ go 1.24.0
 toolchain go1.24.7
 
 require (
-	github.com/bindways/bw_microservice_share v1.8.3
+	github.com/bindways/bw_microservice_share v1.8.7
 	github.com/bindways/bw_microservice_share2 v1.3.4
-	github.com/bindways/bws_microservice_share v0.0.0-00010101000000-000000000000
+	github.com/bindways/bws_microservice_share v0.0.2
 	github.com/gin-gonic/gin v1.9.1
+	github.com/rs/zerolog v1.34.0
 	github.com/stretchr/testify v1.10.0
 	go.mongodb.org/mongo-driver v1.11.6
 	golang.org/x/oauth2 v0.31.0
@@ -16,11 +17,9 @@ require (
 
 )
 
-replace github.com/bindways/bw_microservice_share => ../../bw/bw_microservice_share
-
-replace github.com/bindways/bw_microservice_share2 => ../../bw/bw_microservice_share2
-
-replace github.com/bindways/bws_microservice_share => ../bws_microservice_share
+//replace github.com/bindways/bw_microservice_share => ../../bw/bw_microservice_share
+//replace github.com/bindways/bw_microservice_share2 => ../../bw/bw_microservice_share2
+//replace github.com/bindways/bws_microservice_share => ../bws_microservice_share
 
 require (
 	cloud.google.com/go/auth v0.16.5 // indirect
@@ -75,7 +74,6 @@ require (
 	github.com/prometheus/common v0.55.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/rs/zerolog v1.34.0 // indirect
 	github.com/spf13/afero v1.8.2 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect

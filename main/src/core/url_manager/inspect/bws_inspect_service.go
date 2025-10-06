@@ -1,48 +1,36 @@
 package inspect
 
 import (
-	inspect "bws_microservice_url/main/src/core/auth"
+	inspect2 "bws_microservice_url/main/src/core/search_console"
 	"bws_microservice_url/main/src/dto"
 	"bws_microservice_url/main/src/entity"
 	"bws_microservice_url/main/src/enum"
-	"context"
 	"errors"
 	"time"
 
 	"github.com/bindways/bw_microservice_share/bw_helper/bw_time_helper"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"golang.org/x/oauth2"
-	"google.golang.org/api/option"
 	"google.golang.org/api/searchconsole/v1"
 )
 
-var (
-	googleOauthConfig *oauth2.Config
-)
-
 type BwsInspectService struct {
-	authService *inspect.BwAuthService
+	searchConsoleService *inspect2.BwsSearchConsoleService
 }
 
 func (t *BwsInspectService) Constructor() *BwsInspectService {
-	t.authService = new(inspect.BwAuthService).Constructor()
+	t.searchConsoleService = new(inspect2.BwsSearchConsoleService).Constructor()
 	return t
 }
 
 func (t *BwsInspectService) InspectURL(idCustomer primitive.ObjectID,
-	requestData dto.BwsRequestData) (data entity.BwsSearchEngineTrack, err error) {
+	requestData dto.BwsRequestData) (engineTrack entity.BwsSearchEngineTrack, err error) {
 
 	if err = requestData.Valid(); err != nil {
 		return
 	}
-	token, err := t.authService.GetToken(idCustomer)
+	searchConsoleService, err := t.searchConsoleService.GetSearchConsoleService(idCustomer)
 	if err != nil {
-		return
-	}
-	client := googleOauthConfig.Client(context.Background(), token)
-	searchConsoleService, err := searchconsole.NewService(context.Background(), option.WithHTTPClient(client))
-	if err != nil {
-		return data, errors.New("cant create google search service")
+		return engineTrack, errors.New("cant create google search service")
 	}
 	inspectUrlIndexRequest := dto.NewInspectUrlIndexRequest(requestData)
 	resp, err := searchConsoleService.UrlInspection.Index.Inspect(inspectUrlIndexRequest).Do()
@@ -73,7 +61,7 @@ func (t *BwsInspectService) SetInspectURL(resp *searchconsole.InspectUrlIndexRes
 			data.LastCrawlDate = crawlTime
 		}
 	}
-	data.BwsSearchEngine = enum.BwsSearchEngineGoogle
+	data.SearchEngine = enum.BwsSearchEngineGoogle
 	data.IndexState = indexingState
 	data.Verdict = verdict
 	data.VerdictDetail = resp.InspectionResult.IndexStatusResult.CoverageState

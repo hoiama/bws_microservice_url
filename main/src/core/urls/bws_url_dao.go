@@ -32,7 +32,7 @@ func (t *BwsProjectDao) insertUrl(url entity.BwsUrlTrack) (err error) {
 /**
  * get urls tracks
  */
-func (t *BwsProjectDao) getUrlTracks(idCustomer primitive.ObjectID) (urlTracks []entity.BwsUrlTrack, err error) {
+func (t *BwsProjectDao) getUrlTracks(idCustomer primitive.ObjectID) (urlTracks entity.BwsUrlTracks, err error) {
 	filter := bson.D{{"idCustomer", idCustomer}}
 	cursor, err := t.collection.Find(context.TODO(), filter)
 	defer func() {
@@ -42,6 +42,18 @@ func (t *BwsProjectDao) getUrlTracks(idCustomer primitive.ObjectID) (urlTracks [
 	}()
 	urlTracks = make([]entity.BwsUrlTrack, 0)
 	err = cursor.All(context.TODO(), &urlTracks)
+	return
+}
+
+/**
+ * Get coupon by code and project name
+ */
+func (t *BwsProjectDao) getUrlById(idUrl primitive.ObjectID) (urlTrack entity.BwsUrlTrack, err error) {
+	filter := bson.D{
+		{"_id", idUrl},
+	}
+	singleResult := t.collection.FindOne(context.TODO(), filter)
+	err = singleResult.Decode(&urlTrack)
 	return
 }
 
@@ -60,4 +72,17 @@ func (t *BwsProjectDao) getUrlTrack(url string) (exist bool, urlTrack entity.Bws
 		return false, urlTrack, err
 	}
 	return true, urlTrack, err
+}
+
+/**
+ * update track data
+ */
+func (t *BwsProjectDao) updateTrack(track entity.BwsUrlTrack) (err error) {
+	update := bson.D{
+		{"$set", bson.D{
+			{"searchEngineTrack", track.SearchEngineTrack},
+		}},
+	}
+	_, err = t.collection.UpdateByID(context.TODO(), track.Id, update)
+	return
 }

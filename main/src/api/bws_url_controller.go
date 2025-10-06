@@ -1,7 +1,8 @@
 package api
 
 import (
-	"bws_microservice_url/main/src/core/url_register"
+	"bws_microservice_url/main/src/core/url_manager/register"
+	"bws_microservice_url/main/src/core/url_manager/update"
 	"bws_microservice_url/main/src/core/urls"
 	"bws_microservice_url/main/src/dto"
 	"net/http"
@@ -15,17 +16,35 @@ import (
 )
 
 type BwsUrlController struct {
-	urlRegisterService *url_register.BwsUrlRegisterService
+	urlRegisterService *register.BwsUrlRegisterService
+	urlUpdateService   *update.BwsUrlUpdate
 	urlTrackService    *urls.BwsUrlTrackService
 }
 
 func (t *BwsUrlController) Constructor1() *BwsUrlController {
-	t.urlRegisterService = new(url_register.BwsUrlRegisterService).Constructor()
+	t.urlUpdateService = new(update.BwsUrlUpdate).Constructor()
+	t.urlRegisterService = new(register.BwsUrlRegisterService).Constructor()
 	t.urlTrackService = new(urls.BwsUrlTrackService).Constructor1()
 	return t
 }
 
 func (t *BwsUrlController) Controller(engine *gin.Engine) {
+	engine.GET(router.BwsMicroserviceUrl.GetPublicPath("/track/all"),
+		bw_oauth.CheckHasRoles(enum.BwsRoleCustomer),
+		func(context *gin.Context) {
+			idCustomer, err := primitive.ObjectIDFromHex(context.GetString("idToken"))
+			if err != nil {
+				bw_helper.NewErrorResponse400(context, err)
+				return
+			}
+			urlTrack, err := t.urlTrackService.GetUrlTrackByCustomer(idCustomer)
+			if err != nil {
+				bw_helper.NewErrorResponse400(context, err)
+				return
+			}
+			context.JSON(http.StatusOK, urlTrack)
+		},
+	)
 
 	engine.POST(router.BwsMicroserviceUrl.GetPublicPath("/creation"),
 		bw_oauth.CheckHasRoles(enum.BwsRoleCustomer),
@@ -48,7 +67,7 @@ func (t *BwsUrlController) Controller(engine *gin.Engine) {
 		},
 	)
 
-	engine.GET(router.BwsMicroserviceUrl.GetPublicPath("/track/all"),
+	engine.PUT(router.BwsMicroserviceUrl.GetPublicPath("/track/:idUrl"),
 		bw_oauth.CheckHasRoles(enum.BwsRoleCustomer),
 		func(context *gin.Context) {
 			idCustomer, err := primitive.ObjectIDFromHex(context.GetString("idToken"))
@@ -56,7 +75,12 @@ func (t *BwsUrlController) Controller(engine *gin.Engine) {
 				bw_helper.NewErrorResponse400(context, err)
 				return
 			}
-			urlTrack, err := t.urlTrackService.GetUrlTrackByCustomer(idCustomer)
+			idUrl, err := primitive.ObjectIDFromHex(context.Param("idUrl"))
+			if err != nil {
+				bw_helper.NewErrorResponse400(context, err)
+				return
+			}
+			urlTrack, err := t.urlUpdateService.UpdateUrl(idUrl, idCustomer)
 			if err != nil {
 				bw_helper.NewErrorResponse400(context, err)
 				return
